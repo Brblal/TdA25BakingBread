@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{{ teacher.first_name }} {{ teacher.last_name }} - Profil lektora</title>
+    <link rel="stylesheet" href="CSS_TdA.css">
+</head>
+<body style="background-color:#74C7D3">
+
+    <p>{{ teacher.title_before }} {{ teacher.first_name }} {{ teacher.middle_name }} {{ teacher.last_name }} {{ teacher.title_after }}</p>
+
+    <img class="profile" src="{{ teacher.picture_url }}" alt="Obrázek lektora">
+
+    <p>Místo: {{ teacher.location }}</p>
+    <p>Prohlášení: {{ teacher.claim }}</p>
+    <p>Životopis: {{ teacher.bio }}</p>
+
+    <ul>
+        {% for tag in teacher.tags %}
+            <li>{{ tag.name }}</li>
+        {% endfor %}
+    </ul>
+    <p> {{price_per_hour}}            </p>
+    <p>Telefonní čísla: {{ contact.telephone_numbers }}</p>
+    <p>Emaily: {{ contact.emails }}</p>
+
+</body>
+</html>
