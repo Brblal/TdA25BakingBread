@@ -13,7 +13,7 @@ RUN pipenv install --system --deploy
 
 COPY . .
 
-EXPOSE 80
-
-CMD ["./start.sh"]
+EXPOSE 8080:80
+RUN chmod +x /app/start.sh
+CMD ["/app/start.sh"]
 
