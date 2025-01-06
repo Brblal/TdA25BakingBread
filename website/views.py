@@ -87,13 +87,15 @@ def home():
   
     return render_template("home.html", user=current_user, lecturers=all_lecturers)
 
-@views.route('/lecturer/<uuid>', methods=['GET', 'POST'])
 
-def profile(uuid):
-    teacher = get_teacher_by_uuid(uuid)
-    contact = get_contact_by_uuid(uuid)
-   
-    return render_template('lecturer.html', teacher=teacher, contact=contact)
+
+
+@views.route('/games', methods=['GET', 'POST'])
+def games():
+    # Get the list of all lecturers from the database
+    
+  
+    return render_template("games.html")
 
 
 

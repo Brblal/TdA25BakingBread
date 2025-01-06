@@ -4,7 +4,7 @@ from uuid import uuid4
 from datetime import datetime
 
 # Blueprint for API
-api_bp = Blueprint('api', __name__)
+api_bp = Blueprint('api_v1', __name__, url_prefix='/api/v1')  # Nastavit url_prefix na /api/v1
 api = Api(api_bp)
 
 # In-memory data store
