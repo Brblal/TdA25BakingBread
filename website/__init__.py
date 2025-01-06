@@ -19,7 +19,7 @@ def create_app():
 
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/auth')
-    app.register_blueprint(api_bp, url_prefix='/api')  # Register API blueprint
+    app.register_blueprint(api_bp, url_prefix='/api/v1')  # Register API blueprint
 
     # Create the database if it doesn't exist
     with app.app_context():
