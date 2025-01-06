@@ -3,3 +3,4 @@ flask-login
 flask-sqlalchemy
 flask_wtf
 flask-restful==0.3.9
+FastAPI

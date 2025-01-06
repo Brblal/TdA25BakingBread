@@ -1,10 +1,11 @@
-from flask import Flask, request, jsonify, abort
+from flask import Blueprint, request, jsonify, abort
 from flask_restful import Api, Resource
 from uuid import uuid4
 from datetime import datetime
 
-app = Flask(__name__)
-api = Api(app)
+# Blueprint for API
+api_bp = Blueprint('api', __name__)
+api = Api(api_bp)
 
 # In-memory data store
 games = {}
@@ -79,7 +80,3 @@ class GameDetail(Resource):
 # Add resources to API
 api.add_resource(GameList, "/games")
 api.add_resource(GameDetail, "/games/<string:uuid>")
-
-if __name__ == "__main__":
-    app.run(debug=True)
-
