@@ -1,36 +1,16 @@
 from . import db
 from flask_login import UserMixin
 from sqlalchemy.sql import func
+from datetime import datetime
 
 
-class Tag(db.Model):
+class Game(db.Model):
+    __tablename__ = "games"
     id = db.Column(db.Integer, primary_key=True)
-    uuid = db.Column(db.String(100))
-    name = db.Column(db.String(100))
-    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'))
-    
-
-class Teacher(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    UUID = db.Column(db.String(100), unique=True)
-    title_before = db.Column(db.String(20))
-    first_name = db.Column(db.String(20))
-    middle_name = db.Column(db.String(20))
-    last_name = db.Column(db.String(20))
-    title_after = db.Column(db.String(20))
-    picture_url = db.Column(db.String(200))
-    location = db.Column(db.String(50)) 
-    claim = db.Column(db.String(100))
-    bio = db.Column(db.String(1000))
-    
-    price_per_hour = db.Column(db.Integer)
-    
-    
-    
-    
-class Contact(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    telephone_numbers = db.Column(db.String(100))
-    emails = db.Column(db.String(100))
-    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'))
-    
+    uuid = db.Column(db.String(36), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    difficulty = db.Column(db.String(50), nullable=False)
+    board = db.Column(db.JSON, nullable=False)  # Hrací deska jako JSON
+    game_state = db.Column(db.String(50), default="unknown")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

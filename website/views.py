@@ -4,8 +4,8 @@ from pathlib import Path
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from flask_login import login_user, login_required, logout_user, current_user
-from .models import Tag, Teacher, Contact
+
+
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 import os
@@ -27,75 +27,140 @@ app.config['UPLOAD_FOLDER'] = 'static/files'
 
 api = Blueprint('api', __name__)
 
-def load_json_data(file_path):
-    with codecs.open(file_path, 'r', 'utf-8') as file:
-        data = json.load(file)
-        # Explicitly encode string values to UTF-8
-        if isinstance(data, dict):
-            data = {k: v.encode('utf-8').decode('utf-8') if isinstance(v, str) else v for k, v in data.items()}
-            
-        
-        return data
-def listToString(s):
- 
-    # initialize an empty string
-    str1 = " "
- 
-    # return string
-    return (str1.join(s))
 
-def save_json_data(data):
-    print(listToString(data.get("contact", {}).get("telephone_numbers", [])))
-    teacher = Teacher(
-        UUID=data.get("UUID"),
-        title_before=data.get("title_before"),
-        first_name=data.get("first_name"),
-        middle_name=data.get("middle_name"),
-        last_name=data.get("last_name"),
-        title_after=data.get("title_after"),
-        picture_url=data.get("picture_url"),
-        location=data.get("location"),
-        claim=data.get("claim"),
-        bio=data.get("bio"),
-        price_per_hour=data.get("price_per_hour")
-    )
-    tags = [Tag(uuid=tag["uuid"], name=tag["name"]) for tag in data.get("tags", [])]
-    teacher.tags = tags
-    
-    telephone_numbers=listToString(data.get("contact", {}).get("telephone_numbers", []))
-    emails=listToString(data.get("contact", {}).get("emails", []))
-     
-    contact = Contact(telephone_numbers = telephone_numbers, emails = emails, teacher_id= data.get("UUID"))
-    db.session.add(teacher)
-    db.session.add(contact)
-    db.session.commit()
-    
-def get_teacher_by_uuid(uuid):
-    teacher = Teacher.query.filter_by(UUID=uuid).first()
-    return teacher
-
-def get_contact_by_uuid(uuid):
-    contact = Contact.query.filter_by(teacher_id=uuid).first()
-    
-    return contact
 
 
 @views.route('/', methods=['GET', 'POST'])
 def home():
-    # Get the list of all lecturers from the database
-    all_lecturers = Teacher.query.all()
-  
-    return render_template("home.html", user=current_user, lecturers=all_lecturers)
-
-
-
-
-@views.route('/games', methods=['GET', 'POST'])
-def games():
-    # Get the list of all lecturers from the database
+    
     
   
-    return render_template("games.html")
+    return render_template("home.html")
+@views.route('/restart', methods=['GET', 'POST'])
+def clear():
+    game.reset_board();
+    game.current_player = 'X'
+    return jsonify({'status': 'success'})
+
+@views.route('/make_move', methods=['GET', 'POST'])
+def make_move():
+    data = request.get_json()
+    position = data['position']
+    if game.make_move(position):
+        winner = game.check_winner() 
+        winning_combination = game.get_winning_combination()
+        return jsonify({'status': 'success', 'winner': winner, 'board': game.board, 'winning_combination': winning_combination})
+    else:
+        return jsonify({'status': 'error', 'message': 'Invalid move'})
+
+
+
+  
+    
+
+@views.route('/game', methods=['GET', 'POST'])
+def game():
+
+  
+    return render_template("game.html", board = game.board)
+
+class TicTacToe:
+    def __init__(self, size=15, win_condition=5):
+        self.size = size
+        self.win_condition = win_condition
+        self.board = [' '] * (size * size)
+        self.current_player = 'X'
+        self.game_over = False
+        self.winning_combinations = self.generate_winning_combinations()
+
+    def generate_winning_combinations(self):
+        """Vygeneruje všechny možné výherní kombinace pro danou velikost hracího pole a podmínku na výhru."""
+        combinations = []
+        size = self.size
+        win = self.win_condition
+
+        # Horizontální kombinace
+        for row in range(size):
+            for col in range(size - win + 1):
+                start = row * size + col
+                combination = [start + i for i in range(win)]
+                combinations.append(combination)
+
+        # Vertikální kombinace
+        for col in range(size):
+            for row in range(size - win + 1):
+                start = row * size + col
+                combination = [start + i * size for i in range(win)]
+                combinations.append(combination)
+
+        # Diagonální kombinace (zleva doprava)
+        for row in range(size - win + 1):
+            for col in range(size - win + 1):
+                start = row * size + col
+                combination = [start + i * (size + 1) for i in range(win)]
+                combinations.append(combination)
+
+        # Diagonální kombinace (zprava doleva)
+        for row in range(size - win + 1):
+            for col in range(win - 1, size):
+                start = row * size + col
+                combination = [start + i * (size - 1) for i in range(win)]
+                combinations.append(combination)
+
+        return combinations
+
+    def make_move(self, position):
+        """Provede tah na zvolené pozici, pokud je volná a hra ještě neskončila."""
+        if not self.game_over and self.board[position] == ' ':
+            self.board[position] = self.current_player
+            if self.check_winner():
+                self.game_over = True  # Hra skončila
+            else:
+                self.current_player = 'O' if self.current_player == 'X' else 'X'
+            return True
+        return False
+
+    def check_winner(self):
+        """Zkontroluje, zda někdo vyhrál nebo zda je remíza."""
+        for combo in self.winning_combinations:
+            if all(self.board[i] == self.board[combo[0]] != ' ' for i in combo):
+                return self.board[combo[0]]  # Vrátí vítěze ('X' nebo 'O')
+        if ' ' not in self.board:
+            self.game_over = True  # Remíza, hra skončila
+            return 'Tie'
+        return None
+
+    def get_winning_combination(self):
+        """Vrátí kombinaci, která vyhrála, nebo None."""
+        for combo in self.winning_combinations:
+            if all(self.board[i] == self.board[combo[0]] != ' ' for i in combo):
+                return combo
+        return None
+
+    def reset_board(self):
+        """Resetuje hrací desku."""
+        self.board = [' '] * (self.size * self.size)
+        self.current_player = 'X'
+        self.game_over = False  # Obnoví stav hry
+
+game = TicTacToe()
+from .models import Game  # Import modelu
+@views.route('/challenges', methods=['GET', 'POST'])
+def challenges():
+    
+    
+    games = Game.query.all()  # Načtení všech záznamů z tabulky `games`
+    return render_template('challenges.html', games=games)
+@views.route('/game/<uuid>', methods=['GET'])
+def game_page(uuid):
+    """Render a page for a specific game by UUID."""
+    game = Game.query.filter_by(uuid=uuid).first()
+    if not game:
+        abort(404, description="Game not found.")
+    return render_template('game_page.html', game=game)
+    
+
+
 
 
 

@@ -1,0 +1,17 @@
+<!-- templates/game_page.html -->
+<html>
+<body>
+    <h1>{{ game.name }}</h1>
+    <p>Difficulty: {{ game.difficulty }}</p>
+    <p>Game State: {{ game.gameState }}</p>
+    <table>
+        {% for row in game.board %}
+            <tr>
+                {% for cell in row %}
+                    <td>{{ cell }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

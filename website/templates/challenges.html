@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="CSS_TdA.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Seznam her</h1>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Název</th>
+                    <th>Obtížnost</th>
+                    <th>Stav hry</th>
+                    <th>Vytvořeno</th>
+                    <th>Aktualizováno</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for game in games %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td><a href="{{ url_for('views.game_page', uuid=game.uuid) }}">{{ game.name }}</a></td>
+                    <td>{{ game.difficulty }}</td>
+                    <td>{{ game.game_state }}</td>
+                    <td>{{ game.created_at }}</td>
+                    <td>{{ game.updated_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+{% endblock %}
