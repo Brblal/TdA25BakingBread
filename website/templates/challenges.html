@@ -9,30 +9,75 @@
 <body>
     <div class="container">
         <h1>Seznam her</h1>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Název</th>
-                    <th>Obtížnost</th>
-                    <th>Stav hry</th>
-                    <th>Vytvořeno</th>
-                    <th>Aktualizováno</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for game in games %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td><a href="{{ url_for('views.game_page', uuid=game.uuid) }}">{{ game.name }}</a></td>
-                    <td>{{ game.difficulty }}</td>
-                    <td>{{ game.game_state }}</td>
-                    <td>{{ game.created_at }}</td>
-                    <td>{{ game.updated_at }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+        <!-- Filter Form -->
+        <div class="form-container">
+            <form method="GET" action="{{ url_for('views.challenges') }}">
+                <label for="name">Název hry:</label>
+                <input type="text" id="name" name="name" value="{{ request.args.get('name', '') }}" placeholder="Filtrujte podle názvu">
+
+                <label for="difficulty">Obtížnost:</label>
+                <select id="difficulty" name="difficulty">
+                    <option value="">Vše</option>
+                    <option value="easy" {% if request.args.get('difficulty') == 'easy' %}selected{% endif %}>Lehká</option>
+                    <option value="medium" {% if request.args.get('difficulty') == 'medium' %}selected{% endif %}>Střední</option>
+                    <option value="hard" {% if request.args.get('difficulty') == 'hard' %}selected{% endif %}>Těžká</option>
+                </select>
+
+                <button type="submit">Filtrujte</button>
+            </form>
+        </div>
+
+        <br>
+
+        <!-- Sort Form -->
+        <div class="form-container">
+            <form method="GET" action="{{ url_for('views.challenges') }}">
+                <label for="sort_by">Řadit podle:</label>
+                <select id="sort_by" name="sort_by">
+                    <option value="created_at" {% if request.args.get('sort_by') == 'created_at' %}selected{% endif %}>Datum vytvoření</option>
+                    <option value="updated_at" {% if request.args.get('sort_by') == 'updated_at' %}selected{% endif %}>Datum aktualizace</option>
+                </select>
+
+                <label for="sort_order">Pořadí:</label>
+                <select id="sort_order" name="sort_order">
+                    <option value="asc" {% if request.args.get('sort_order') == 'asc' %}selected{% endif %}>Vzestupně</option>
+                    <option value="desc" {% if request.args.get('sort_order') == 'desc' %}selected{% endif %}>Sestupně</option>
+                </select>
+
+                <button type="submit">Řadit</button>
+            </form>
+        </div>
+
+        <br>
+
+        <!-- Game Table -->
+        <div class="table-container">
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Název</th>
+                        <th>Obtížnost</th>
+                        <th>Stav hry</th>
+                        <th>Vytvořeno</th>
+                        <th>Aktualizováno</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for game in games %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><a href="{{ url_for('views.game_page', uuid=game.uuid) }}">{{ game.name }}</a></td>
+                        <td>{{ game.difficulty }}</td>
+                        <td>{{ game.game_state }}</td>
+                        <td>{{ game.created_at|round_to_nearest_minute }}</td>
+                        <td>{{ game.updated_at|round_to_nearest_minute }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 {% endblock %}

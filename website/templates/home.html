@@ -1,16 +1,30 @@
 {% extends "base.html" %}
- 
-{% block content %}
-<!DOCTYPE html>
-<html>
-<head>
-    <!-- Add your head content here -->
-</head>
-<body>
-    
-    
-    
-</body>
-</html>
 
+{% block content %}
+<div class="main-container">
+    <div class="tile-container">
+        <div class="tile">
+            <a href="{{ url_for('views.game') }}">
+                <img src="{{ url_for('static', filename='files/img/icons/zarivka_playing_bile.png') }}" alt="Local Play Icon">
+                <span>Local Play</span>
+            </a>
+        </div>
+        <div class="tile">
+            <a href="{{ url_for('views.challenges') }}">
+                <img src="{{ url_for('static', filename='files/img/icons/zarivka_thinking_bile.png') }}" alt="Challenges Icon">
+                <span>Challenges</span>
+            </a>
+        </div>
+        <div class="tile">
+            
+                <img src="{{ url_for('static', filename='files/img/icons/zarivka_idea_bile.png') }}" alt="VS AI Icon">
+                <span>VS AI</span>
+            
+        </div>
+        <div class="tile coming-soon">
+            
+            <span>Coming Soon...</span>
+        </div>
+    </div>
+</div>
 {% endblock %}

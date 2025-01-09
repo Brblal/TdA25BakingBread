@@ -3,6 +3,7 @@ body {
     background-image: url('files/img/bg3.png');
     background-repeat: repeat; /* Pozadí se bude opakovat */
     background-size: 50%; /* Velikost jednotlivé "dlaždice" */
+     
     
 }
 
@@ -65,4 +66,171 @@ h1 {
 .winner, winner:hover {
     background-color: lightgoldenrodyellow;
 }
-    
+
+.main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh; /* Adjust height to make sure it's centered in the viewport */
+    text-align: center;
+}
+
+.tile-container {
+    display: grid;
+    grid-template-columns: repeat(2, 300px);  /* Larger tile size */
+    grid-template-rows: repeat(2, 300px);     /* Larger tile size */
+    gap: 30px;
+}
+
+
+
+.tile {
+    background-color: #0070BB;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column; /* Stack image above text */
+    align-items: center;   /* Center align the content */
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    height: 300px;
+    width: 300px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    text-align: center;
+}
+
+.tile a {
+    display: flex;
+    flex-direction: column;  /* Ensure the image and text stack vertically */
+    align-items: center;     /* Center align the content */
+    justify-content: center; /* Center the content within the tile */
+    height: 100%;            /* Take up the entire height of the tile */
+    width: 100%;             /* Take up the entire width of the tile */
+    text-decoration: none;   /* Remove the default underline from the link */
+    color: white;            /* Ensure the text inside the link is white */
+}
+
+.tile img {
+    max-width: 80%;  /* Limit width to 80% of the tile size, maintaining aspect ratio */
+    height: auto;    /* Maintain the original aspect ratio */
+    margin-bottom: 10px; /* Space between the image and the text */
+}
+
+.tile span {
+    font-size: 18px; /* Adjust the text size */
+    font-weight: bold; /* Optional, for emphasis */
+}
+
+.tile:hover {
+    background-color: #395A9A;
+    transform: scale(1.1);
+}
+.coming-soon {
+    background-color: #b0b0b0;  /* Gray for "Coming Soon" */
+    pointer-events: none;  /* Disable clicking on "Coming Soon" */
+}
+
+.coming-soon a {
+    color: white;
+}
+/* Main container for the content */
+
+/* Main container for the content */
+.container1 {
+    background-color: #ffffff; /* White background for the content section */
+    padding: 30px;
+    border-radius: 8px; /* Optional: rounded corners */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Optional: shadow for floating effect */
+}
+
+/* Form container for filter and sort forms */
+.form-container {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.form-container label {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.form-container input, .form-container select {
+    margin-bottom: 10px;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.form-container button {
+    padding: 8px 16px;
+    background-color: #0070BB;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.form-container button:hover {
+    background-color: #395A9A;
+}
+
+/* Table container */
+.table-container {
+    width: 100%;
+    max-width: 1200px;
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+}
+
+th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+tr:hover {
+    background-color: #f1f1f1;
+}
+
+a {
+    text-decoration: none;
+    color: #0070BB;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Adjustments for table responsiveness */
+@media screen and (max-width: 768px) {
+    .form-container {
+        width: 100%;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    th, td {
+        padding: 8px;
+    }
+}

@@ -1,16 +1,24 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
+from datetime import datetime, timedelta
+
+
 
 # Inicializace db
 db = SQLAlchemy()
 DB_NAME = "database.db"
+def round_to_nearest_minute(dt):
+    if dt is not None:
+        return dt.replace(second=0, microsecond=0) + timedelta(minutes=(dt.second >= 30))
+    return None
 
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'hjshjhdjah kjshkjdhjs'
     app.config['UPLOAD_FOLDER'] = 'static/files'
     app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{DB_NAME}'
+    app.jinja_env.filters['round_to_nearest_minute'] = round_to_nearest_minute
     db.init_app(app)
 
     # Registrovat blueprints
@@ -47,3 +55,4 @@ def add_game(game_data):
     db.session.add(game)
     db.session.commit()
     print(f"Game '{game.name}' added to database!")
+

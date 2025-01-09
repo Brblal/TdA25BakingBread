@@ -1,17 +1,164 @@
-<!-- templates/game_page.html -->
 <html>
-<body>
-    <h1>{{ game.name }}</h1>
-    <p>Difficulty: {{ game.difficulty }}</p>
-    <p>Game State: {{ game.gameState }}</p>
-    <table>
-        {% for row in game.board %}
-            <tr>
-                {% for cell in row %}
-                    <td>{{ cell }}</td>
+    <head>
+        <meta charset="UTF-8">
+        <title>Tic Tac Toe 15x15</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+        <style>
+            body {
+                background-color: #74C7D3;
+                font-family: Arial, sans-serif;
+                text-align: center;
+                margin: 0;
+                padding: 0;
+            }
+
+            h1 {
+                color: #333;
+            }
+
+            #game-board {
+                display: grid;
+                grid-template-columns: repeat(15, 40px); /* 15 columns */
+                grid-template-rows: repeat(15, 40px);    /* 15 rows */
+                gap: 2px;
+                justify-content: center;
+                margin-top: 20px;
+            }
+
+            .cell {
+                width: 40px;
+                height: 40px;
+                border: 1px solid #ccc;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 24px;
+                cursor: pointer;
+                background-color: #fff;
+            }
+
+            .cell.winner {
+                background-color: #ffeb3b;
+            }
+
+            #status-message {
+                margin-top: 20px;
+                font-size: 18px;
+                font-weight: bold;
+            }
+
+            #restart-btn {
+                margin-top: 20px;
+                padding: 10px 20px;
+                font-size: 16px;
+                cursor: pointer;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 5px;
+            }
+
+            #restart-btn:hover {
+                background-color: #45a049;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>{{ game.name }}</h1>
+            <p>Difficulty: {{ game.difficulty }}</p>
+            <p>Game State: {{ game.game_state }}</p>
+
+            <!-- Game board -->
+            <div id="game-board">
+                {% for row_index in range(game.board|length) %}
+                    <div class="row">
+                        {% for col_index in range(game.board[row_index]|length) %}
+                            <div class="cell" 
+                                data-row="{{ row_index }}" 
+                                data-col="{{ col_index }}">
+                                {{ game.board[row_index][col_index] if game.board[row_index][col_index] != '' else '' }}
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% endfor %}
-            </tr>
-        {% endfor %}
-    </table>
-</body>
+            </div>
+
+            <div id="status-message"></div>
+            <button id="restart-btn">Restart Game</button>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <script>
+            $(document).ready(function() {
+                // Handle click on cells to make a move
+                $('.cell').click(function() {
+                var row = $(this).data('row');
+                var col = $(this).data('col');
+                console.log('Clicked on row:', row, 'col:', col);  // Ladicí výpis
+                makeMove(row, col);
+                });
+
+                // Restart the game
+                $("#restart-btn").on('click', function() {
+                    $.ajax({
+                        url: '/restart',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        success: function(data) {
+                            $('.cell').text('');
+                            $('.cell').removeClass('winner');
+                            $("#status-message").text('');
+                        }
+                    });
+                });
+            });
+
+            // Function to make a move
+            function makeMove(row, col) {
+                $.ajax({
+                    url: '/game/{{ game.uuid }}',
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ 'row': row, 'col': col }),
+                    success: function(data) {
+                        if (data.status === 'success') {
+                            updateBoard(data.board);
+                            if (data.gameState === 'Game Over') {
+                                if (data.gameState === 'Tie') {
+                                    $('#status-message').text('The game has ended in a tie!');
+                                } else {
+                                    $('#status-message').text('Winner: ' + data.currentPlayer);
+                                    highlightWinner(data.winning_combination);
+                                }
+                            }
+                        } else {
+                            alert(data.message);
+                        }
+                    }
+                });
+            }
+
+            // Function to highlight winning combination
+            function highlightWinner(winningCombination) {
+                $(".cell").removeClass('winner');
+                winningCombination.forEach(function(position) {
+                    var row = Math.floor(position / 15);
+                    var col = position % 15;
+                    $(".cell[data-row='" + row + "'][data-col='" + col + "']").addClass('winner');
+                });
+            }
+
+            // Function to update the board display
+            function updateBoard(board) {
+                $('.cell').each(function() {
+                    var row = $(this).data('row');
+                    var col = $(this).data('col');
+                    var cellContent = board[row][col] !== ' ' ? board[row][col] : '';
+                    $(this).text(cellContent);
+                });
+            }
+        </script>
+    </body>
 </html>
