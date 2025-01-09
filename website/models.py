@@ -21,4 +21,4 @@ class Game(db.Model):
         self.uuid = uuid if uuid else str(func.uuid())  # Generates UUID if not provided
         self.board = board if board else [['' for _ in range(15)] for _ in range(15)]  # Default to 15x15 empty grid
         self.current_player = 'X'
-        self.game_state = 'Early game'
+        self.game_state = 'opening'
