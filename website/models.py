@@ -15,10 +15,10 @@ class Game(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    def __init__(self, name, difficulty, board=None, uuid=None):
+    def __init__(self, name, difficulty, board=None, game_state='opening', uuid=None):
         self.name = name
         self.difficulty = difficulty
         self.uuid = uuid if uuid else str(func.uuid())  # Generates UUID if not provided
         self.board = board if board else [['' for _ in range(15)] for _ in range(15)]  # Default to 15x15 empty grid
         self.current_player = 'X'
-        self.game_state = 'Early game'
+        self.game_state = game_state

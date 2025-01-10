@@ -19,8 +19,67 @@ def validate_game_data(data):
         abort(400, description="Missing required fields.")
     if len(data["board"]) != 15 or any(len(row) != 15 for row in data["board"]):
         abort(422, description="Board must be 15x15.")
+    flattened_board = [cell for row in data["board"] for cell in row]
+    x_count = flattened_board.count('X')
+    o_count = flattened_board.count('O')
+    if not all(cell in ['X', 'O', ''] for cell in flattened_board):
+        abort(422, description="Board contains invalid characters. Only 'X', 'O', and '' are allowed.")
+    # Validate move counts
+    if not (x_count == o_count or x_count == o_count + 1):
+        abort(422, description="Invalid game state: Incorrect counts of X and O.")
+        
 
+def compute_game_state(board):
+    """Analyze the board and determine the game state."""
+    def check_line(line):
+        # Kontrola, zda line obsahuje alespoň 4 po sobě jdoucí stejné symboly
+        count = 1
+        for i in range(1, len(line)):
+            if line[i] == line[i - 1] and line[i] in ['X', 'O']:
+                count += 1
+                if count >= 4:
+                    return True
+            else:
+                count = 1
+        return False
+
+    # Kontrola řádků
+    for row in board:
+        if check_line(row):
+            return "Endgame"
+
+    # Kontrola sloupců
+    for col in range(len(board[0])):
+        column = [board[row][col] for row in range(len(board))]
+        if check_line(column):
+            return "Endgame"
+
+    # Kontrola diagonál
+    for d in range(-len(board) + 1, len(board[0])):
+        diagonal1 = [board[i][i + d] for i in range(max(0, -d), min(len(board), len(board[0]) - d))]
+        diagonal2 = [board[i][len(board[0]) - 1 - i - d] for i in range(max(0, -d), min(len(board), len(board[0]) - d))]
+        if check_line(diagonal1) or check_line(diagonal2):
+            return "Endgame"
+
+    # Zkontrolovat, zda je hra stále možná
+    flattened_board = [cell for row in board for cell in row]
+    if "" in flattened_board:
+        return "Midgame"
+
+    # Jinak je hra remíza
+    return "Draw"
+    # Determine state based on move count
+    total_moves = x_count + o_count
+    if total_moves < 5:
+        return "Opening"
+    elif total_moves >= 5:
+        return "Midgame"
+
+    return "Invalid"
+        
 # Resources
+
+
 class GameList(Resource):
     def get(self):
         """Get all games from database."""
@@ -40,12 +99,16 @@ class GameList(Resource):
         data = request.get_json()
         validate_game_data(data)
 
+    # Compute the game state
+        game_state = compute_game_state(data["board"])
+
         game_id = str(uuid4())
         game = Game(
             uuid=game_id,
             name=data["name"],
             difficulty=data["difficulty"],
-            board=data["board"]
+            board=data["board"],
+            game_state=game_state  # Uložit stav hry
         )
         db.session.add(game)
         db.session.commit()
@@ -54,7 +117,7 @@ class GameList(Resource):
             "uuid": game.uuid,
             "name": game.name,
             "difficulty": game.difficulty,
-            "gameState": game.game_state,
+            "gameState": game.game_state,  # Odpověď obsahuje stav hry
             "board": game.board,
             "createdAt": game.created_at.isoformat(),
             "updatedAt": game.updated_at.isoformat()
