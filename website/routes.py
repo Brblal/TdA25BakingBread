@@ -40,7 +40,7 @@ def compute_game_state(board):
     # Determine state based on move count (Opening or Midgame)
     total_moves = x_count + o_count
     if total_moves < 6:
-        return "Opening"
+        return "opening"
 
     # Check for Endgame conditions (4 consecutive X's or O's)
     def check_line(line):
@@ -57,27 +57,27 @@ def compute_game_state(board):
     # Check rows for a winning condition
     for row in board:
         if check_line(row):
-            return "Endgame"
+            return "endgame"
 
     # Check columns for a winning condition
     for col in range(len(board[0])):
         column = [board[row][col] for row in range(len(board))]
         if check_line(column):
-            return "Endgame"
+            return "endgame"
 
     # Check diagonals for a winning condition
     for d in range(-len(board) + 1, len(board[0])):
         diagonal1 = [board[i][i + d] for i in range(max(0, -d), min(len(board), len(board[0]) - d))]
         diagonal2 = [board[i][len(board[0]) - 1 - i - d] for i in range(max(0, -d), min(len(board), len(board[0]) - d))]
         if check_line(diagonal1) or check_line(diagonal2):
-            return "Endgame"
+            return "endgame"
 
     # If the game is still possible, it's Midgame (there are still empty cells)
     if "" in flattened_board:
-        return "Midgame"
+        return "midgame"
 
     # If no empty cells and no winner, it's a draw
-    return "Draw"
+    return "draw"
         
 # Resources
 
