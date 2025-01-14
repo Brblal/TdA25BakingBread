@@ -72,7 +72,7 @@ def compute_game_state(board):
     total_moves = x_count + o_count
     if total_moves <= 5:
         return "Opening"
-    elif total_moves > 5:
+    elif total_moves > 6:
         return "Midgame"
 
     return "Invalid"
