@@ -31,8 +31,19 @@ def validate_game_data(data):
 
 def compute_game_state(board):
     """Analyze the board and determine the game state."""
+    
+    # Flatten the board and count 'X' and 'O' symbols
+    flattened_board = [cell for row in board for cell in row]
+    x_count = flattened_board.count('X')
+    o_count = flattened_board.count('O')
+
+    # Determine state based on move count (Opening or Midgame)
+    total_moves = x_count + o_count
+    if total_moves < 6:
+        return "Opening"
+
+    # Check for Endgame conditions (4 consecutive X's or O's)
     def check_line(line):
-        # Kontrola, zda line obsahuje alespoň 4 po sobě jdoucí stejné symboly
         count = 1
         for i in range(1, len(line)):
             if line[i] == line[i - 1] and line[i] in ['X', 'O']:
@@ -43,39 +54,30 @@ def compute_game_state(board):
                 count = 1
         return False
 
-    # Kontrola řádků
+    # Check rows for a winning condition
     for row in board:
         if check_line(row):
             return "Endgame"
 
-    # Kontrola sloupců
+    # Check columns for a winning condition
     for col in range(len(board[0])):
         column = [board[row][col] for row in range(len(board))]
         if check_line(column):
             return "Endgame"
 
-    # Kontrola diagonál
+    # Check diagonals for a winning condition
     for d in range(-len(board) + 1, len(board[0])):
         diagonal1 = [board[i][i + d] for i in range(max(0, -d), min(len(board), len(board[0]) - d))]
         diagonal2 = [board[i][len(board[0]) - 1 - i - d] for i in range(max(0, -d), min(len(board), len(board[0]) - d))]
         if check_line(diagonal1) or check_line(diagonal2):
             return "Endgame"
 
-    # Zkontrolovat, zda je hra stále možná
-    flattened_board = [cell for row in board for cell in row]
+    # If the game is still possible, it's Midgame (there are still empty cells)
     if "" in flattened_board:
         return "Midgame"
 
-    # Jinak je hra remíza
+    # If no empty cells and no winner, it's a draw
     return "Draw"
-    # Determine state based on move count
-    total_moves = x_count + o_count
-    if total_moves <= 5:
-        return "Opening"
-    elif total_moves > 6:
-        return "Midgame"
-
-    return "Invalid"
         
 # Resources
 
