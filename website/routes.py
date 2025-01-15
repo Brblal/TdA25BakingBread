@@ -44,12 +44,17 @@ def compute_game_state(board):
 
     # Check for Endgame conditions (4 consecutive X's or O's)
     def check_line(line):
+    
         count = 1
         for i in range(1, len(line)):
             if line[i] == line[i - 1] and line[i] in ['X', 'O']:
                 count += 1
-                if count >= 4:
-                    return True
+                if count == 4:
+                    # Check if the sequence is blocked on both sides
+                    left_blocked = (i - 4 < 0) or (line[i - 4] != '' and line[i - 4] != line[i])
+                    right_blocked = (i + 1 >= len(line)) or (line[i + 1] != '' and line[i + 1] != line[i])
+                    if not (left_blocked and right_blocked):  # Not fully blocked
+                        return True
             else:
                 count = 1
         return False
