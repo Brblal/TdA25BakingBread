@@ -42,9 +42,11 @@ def compute_game_state(board):
     if total_moves < 6:
         return "opening"
 
+    # Determine the next player based on the current counts
+    next_player = 'X' if x_count <= o_count else 'O'
+
     # Check for Endgame conditions (4 consecutive X's or O's)
     def check_line(line):
-    
         count = 1
         for i in range(1, len(line)):
             if line[i] == line[i - 1] and line[i] in ['X', 'O']:
@@ -53,8 +55,16 @@ def compute_game_state(board):
                     # Check if the sequence is blocked on both sides
                     left_blocked = (i - 4 < 0) or (line[i - 4] != '' and line[i - 4] != line[i])
                     right_blocked = (i + 1 >= len(line)) or (line[i + 1] != '' and line[i + 1] != line[i])
-                    if not (left_blocked and right_blocked):  # Not fully blocked
-                        return True
+
+                    if left_blocked and right_blocked:  # Fully blocked on both sides
+                        return False
+
+                    if left_blocked or right_blocked:  # One side blocked
+                        if next_player == line[i]:  # It's the player's turn
+                            return True
+                        else:
+                            return False
+                    return True  # No side blocked (open line)
             else:
                 count = 1
         return False
@@ -83,7 +93,6 @@ def compute_game_state(board):
 
     # If no empty cells and no winner, it's a draw
     return "draw"
-        
 # Resources
 
 
