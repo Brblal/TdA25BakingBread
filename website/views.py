@@ -145,7 +145,27 @@ class TicTacToe:
         self.board = [' '] * (self.size * self.size)
         self.current_player = 'X'
         self.game_over = False  # Obnoví stav hry
+@views.route('/save_game', methods=['POST'])
+def save_game():
+    """Save the game state with a name and difficulty level."""
+    game_name = request.form.get('game_name')
+    difficulty = request.form.get('difficulty')
 
+    if not game_name or not difficulty:
+        return jsonify({'status': 'error', 'message': 'Game name and difficulty are required.'}), 400
+
+    # Example of saving the game - replace with actual database logic
+    saved_game = {
+        'name': game_name,
+        'difficulty': difficulty,
+        'board': game.board,
+        'current_player': game.current_player,
+        'game_over': game.game_over
+    }
+    # For now, we just print it. Replace this with database save logic.
+    print(f"Game saved: {saved_game}")
+
+    return jsonify({'status': 'success', 'message': f'Game "{game_name}" saved successfully!'})
 game = TicTacToe()
 from .models import Game  # Import modelu
 @views.route('/challenges', methods=['GET', 'POST'])

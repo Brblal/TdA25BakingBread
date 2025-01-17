@@ -24,41 +24,46 @@ h1 {
 
 #game-board {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    grid-gap: 5px;
-    margin-bottom: 20px;
+    grid-template-columns: repeat(15, 30px); /* 15 columns, smaller cells */
+    grid-template-rows: repeat(15, 30px);    /* 15 rows */
+    gap: 1px; /* Reduced gap for compact layout */
+    justify-content: center;
+    margin-top: 10px; /* Smaller margin */
 }
+
 .cell {
-    width: 130px;
-    height: 130px;
-    font-size: 36px;
-    background-color: #f0f0f0;
+    width: 30px; /* Smaller width */
+    height: 30px; /* Smaller height */
     border: 1px solid #ccc;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    font-size: 18px; /* Adjusted font size */
     cursor: pointer;
+    background-color: #fff;
+}
+.cell.winner {
+    background-color: #ffeb3b;  /* Yellow highlight for the winning cells */
 }
 
-#status-message {
-    font-size: 18px;
-    margin-bottom: 20px;
+body {
+    margin: 0;
+    padding: 0;
+    font-size: 14px; /* Smaller base font */
 }
 
-#restart-btn {
-    padding: 10px 20px;
-    font-size: 18px;
-    background-color: darkcyan;
-    color: #000;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+h1 {
+    font-size: 22px; /* Adjusted title size */
 }
 
-#restart-btn:hover {
-    background-color: rgb(0, 117, 117);
+#restart-btn, #delete-btn, #update-btn {
+    font-size: 14px; /* Adjusted button size */
+    padding: 8px 16px; /* Smaller padding */
 }
 
+#restart-btn:hover, #delete-btn:hover, #update-btn:hover {
+    background-color: #45a049;
+}
 .cell:hover {
     background-color: #e0e0e0;
 }
@@ -183,8 +188,10 @@ h1 {
 /* Table container */
 .table-container {
     width: 100%;
+    height: 600px;
     max-width: 1200px;
     margin-top: 20px;
+    overflow-y: auto;
 }
 
 table {

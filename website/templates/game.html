@@ -40,7 +40,67 @@
         </div>
         <div id="status-message"></div>
         <button id="restart-btn">Restart Game</button>
-    </div>
+
+        <!-- Form for saving the game -->
+<div class="form-container">
+    <form id="save-game-form">
+        <label for="game-name">Game Name:</label>
+        <input type="text" id="game-name" name="game_name" placeholder="Enter game name" required>
+        
+        <label for="difficulty">Difficulty Level:</label>
+        <select id="difficulty" name="difficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+        
+        <button type="button" id="save-game-button">Save Game</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('save-game-button').addEventListener('click', async () => {
+        const gameName = document.getElementById('game-name').value;
+        const difficulty = document.getElementById('difficulty').value;
+
+        // Get the current state of the board from the DOM
+        const board = [];
+        document.querySelectorAll('#game-board .cell').forEach((cell, index) => {
+            const row = Math.floor(index / 15);
+            const col = index % 15;
+            if (!board[row]) board[row] = [];
+            board[row][col] = cell.textContent.trim() || '';
+        });
+
+        const payload = {
+            name: gameName,
+            difficulty: difficulty,
+            board: board
+        };
+
+        try {
+            const response = await fetch('/api/v1/games', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // Redirect to the game page with the UUID
+                window.location.href = `/game/${data.uuid}`;
+            } else {
+                const error = await response.json();
+                alert(`Error: ${error.description || 'Something went wrong'}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Failed to save the game. Please try again later.');
+        }
+    });
+</script>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
