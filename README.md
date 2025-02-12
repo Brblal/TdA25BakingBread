@@ -45,7 +45,7 @@ docker run -p 8080:80 -v %cd%:/app tda-flask
 
 
 Aplikace bude přístupná na `http://127.0.0.1:8080`
-
+eeee
 ## Virtuální prostředí a správa balíčků
 
 Jak využít nástroj [Pipenv](https://pypi.org/project/pipenv/), který kombinuje pip a virtualenv. 
