@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from os import path
 from datetime import datetime, timedelta
-
+from flask_login import LoginManager
 
 
 # Inicializace db
@@ -29,7 +29,16 @@ def create_app():
     app.register_blueprint(api_bp, url_prefix='/api/v1')  # Register API blueprint
 
     # Importovat modely až po inicializaci db
-    from .models import Game  # Importujte model hry
+    from .models import Game  
+    login_manager = LoginManager()
+    login_manager.login_view = 'auth.login'  # Název view funkce pro login
+    login_manager.init_app(app)
+
+    from .models import User
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))# Importujte model hry
 
     # Vytvořit databázi, pokud neexistuje
     with app.app_context():

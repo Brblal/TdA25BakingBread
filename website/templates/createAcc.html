@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}
+Create Account
+{% endblock %}
+
+{% block content%}
+<style>
+body {
+ 
+  background-image: url('/static/files/img/bg2.png');
+  
+  
+  
+}
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: black;
+  opacity: 1; /* Firefox */
+
+}
+    </style>
+<br><br><br><br>
+<form class="zaznam" method="POST">
+    <h3 align="center">Vytvořit Účet</h3>
+    <br><br>
+    <div class="form-group">
+        
+        <input type="email" class="zaznam1" id="email" name="email" placeholder="Napište Email"/>
+    </div>
+    <div class="form-group">
+        <br>
+        <input type="text" class="zaznam1" id="name" name="name" placeholder="Napište Celé jméno"/>
+    </div>
+    <div class="form-group">
+        <br>
+        <input type="text" class="zaznam1" id="userName" name="userName" placeholder="Napište Uživatelské jméno"/>
+    </div>
+    <div class="form-group">
+       <br>
+        <input type="password" class="zaznam1" id="password1" name="password1" placeholder="Napište Heslo"/>
+    </div>
+    <div class="form-group">
+        <br>
+        <input type="password" class="zaznam1" id="password2" name="password2" placeholder="Znovu napište Heslo"/>
+    </div>
+    <div class="form-group">
+        <input class="form-check-input" type="checkbox" id="check" name="check" value="something" >
+        <label class="form-check-label" for="check">Admin</label>
+      </div>
+  
+    <button type="submit" class="zaznambtn">Vytvořit</button>
+</form>
+{% endblock %}

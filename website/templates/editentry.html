@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}
+Edit entry
+{% endblock %}
+
+{% block content%}
+<style>
+    body {
+     
+      background-image: url('/static/files/img/bg2.png');
+      
+      
+      
+    }
+    ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+      color: black;
+      opacity: 1; /* Firefox */
+    
+    }
+    </style>
+    
+<form class="zaznam" method="POST">
+    <h2 align="center">Upravení Záznamu</h2>
+    <br>
+
+<input value="{{entry.nametext}}" id="name-text" name="name-text" type="text" placeholder="Název" class="zaznam1">
+
+<input value="{{entry.date}}" type="date" class="zaznam2" id="date" name="date"/>
+
+
+
+{% if entry.progLang == 'JavaScript' %}
+    <select  class="zaznam3" name="progLang" id="progLang">
+    <option value="JavaScript"selected>JavaScript</option>
+    <option value="C">C</option>
+    <option value="Python">Python</option>
+    <option value="Java">Java</option>
+    <option value="C#">C#</option>
+    </select>
+{% elif entry.progLang == 'C' %}
+    <select  class="zaznam3" name="progLang" id="progLang">
+    <option value="JavaScript">JavaScript</option>
+    <option value="C" selected>C</option>
+    <option value="Python">Python</option>
+    <option value="Java">Java</option>
+    <option value="C#">C#</option>
+    </select>
+{% elif entry.progLang == 'Python' %}
+    <select  class="zaznam3" name="progLang" id="progLang">
+    <option value="JavaScript">JavaScript</option>
+    <option value="C">C</option>
+    <option value="Python" selected>Python</option>
+    <option value="Java">Java</option>
+    <option value="C#">C#</option>
+    </select>
+{% elif entry.progLang == 'Java' %}
+    <select  class="zaznam3" name="progLang" id="progLang">
+    <option value="JavaScript">JavaScript</option>
+    <option value="C">C</option>
+    <option value="Python">Python</option>
+    <option value="Java" selected>Java</option>
+    <option value="C#">C#</option>
+    </select>
+{% elif entry.progLang == 'C#' %}
+    <select  class="zaznam3" name="progLang" id="progLang">
+    <option value="JavaScript">JavaScript</option>
+    <option value="C">C</option>
+    <option value="Python">Python</option>
+    <option value="Java">Java</option>
+    <option value="C#" selected>C#</option>
+    </select>
+{% endif %}
+
+
+
+<input value="{{entry.minutes}}" id="minutes" name="minutes" type="number" class="zaznam4" placeholder="Minuty"/>
+
+
+<br>
+<div id="stars" name="stars" class="stars">
+    <input class="star star-5" id="star-5" type="radio" name="star"/>
+    <label class="star star-5" for="star-5"></label>
+    <input class="star star-4" id="star-4" type="radio" name="star"/>
+    <label class="star star-4" for="star-4"></label>
+    <input class="star star-3" id="star-3" type="radio" name="star"/>
+    <label class="star star-3" for="star-3"></label>
+    <input class="star star-2" id="star-2" type="radio" name="star"/>
+    <label class="star star-2" for="star-2"></label>
+    <input class="star star-1" id="star-1" type="radio" name="star"/>
+    <label class="star star-1" for="star-1"></label>
+</div>
+<br>
+
+<textarea id="entry" name="entry" class="zaznamtext" placeholder="Zde napište svůj zápis...">{{entry.entry}}</textarea>
+<div class="zaznamcnt" id="the-count">
+    <span id="current">0</span>
+    <span id="maximum">/ 600</span>
+</div>
+<br>
+<button type="submit" class="zaznambtn">Upravit zápis</button>
+</form>
+    
+
+
+
+{% endblock%}

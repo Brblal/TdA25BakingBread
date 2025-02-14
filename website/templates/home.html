@@ -21,10 +21,14 @@
                 <span>VS AI</span>
             
         </div>
-        <div class="tile coming-soon">
-            
-            <span>Coming Soon...</span>
-        </div>
+ <div class="tile">
+    <form action="{{ url_for('views.freeplay_page') }}" method="POST">
+        <button type="submit" class="btn">
+            <img src="{{ url_for('static', filename='files/img/icons/zarivka_thinking_bile.png') }}" alt="Challenges Icon">
+            <span>New Game</span>
+        </button>
+    </form>
+</div>
     </div>
 </div>
 {% endblock %}

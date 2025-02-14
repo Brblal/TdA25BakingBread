@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Multiplayer Tic Tac Toe 15x15</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <style>
+        /* Same CSS as before */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Piškvorky Multiplayer</h1>
+        <p><b>Hraje: <span id="current-player">{{ game.current_player }}</span></b></p>
+        <p>Stav hry: <span id="game-state">{{ game.game_state }}</span></p>
+
+        <div id="game-board">
+            {% for row_index in range(game.board|length) %}
+                {% for col_index in range(game.board[row_index]|length) %}
+                    <div class="cell" 
+                        data-row="{{ row_index }}" 
+                        data-col="{{ col_index }}">
+                        {{ game.board[row_index][col_index] if game.board[row_index][col_index] != '' else '' }}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+
+        <div id="status-message"></div>
+        <button id="restart-btn">Restartovat hru</button>
+        <p>Players debug: {{ game.players }}</p>
+        <p>Current player UUID: {{ player_uuid }}</p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        let gamePlayers = JSON.parse('{{ game_players | tojson | safe }}');
+        let playerUUID = "{{ player_uuid }}";
+        let gameUUID = "{{ game.uuid }}"; // UUID hry
+        let playerSymbol = "";
+
+        // Určení symbolu hráče
+        if (playerUUID === gamePlayers["X"]) {
+            playerSymbol = "X";
+        } else if (playerUUID === gamePlayers["O"]) {
+            playerSymbol = "O";
+        }
+
+        $("#status-message").text("Tvoje značka: " + playerSymbol);
+
+        // Function to send the PUT request when a player makes a move
+        function makeMove(row, col) {
+    fetch(`/freeplay/move/${gameUUID}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            row: row,
+            col: col,
+            player_uuid: playerUUID // This should come from the URL, which is passed to the frontend
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            updateBoard(data.board); // Update the board after the move
+            $("#current-player").text(data.current_player);
+            if (data.game_state === "finished") {
+                $("#game-state").text("Hra skončila");
+            }
+        } else {
+            alert(data.error); // Display an error message if there is an issue
+        }
+    });
+}
+
+        // Function to update the game board
+        function updateBoard(board) {
+            $(".cell").each(function() {
+                let row = $(this).data("row");
+                let col = $(this).data("col");
+                $(this).text(board[row][col] || ""); // Update the cell with current symbol
+                $(this).removeClass('winner');  // Remove winner highlighting
+            });
+        }
+
+        // Function to highlight the winner
+        function highlightWinner(winner) {
+            $(".cell").each(function() {
+                let row = $(this).data("row");
+                let col = $(this).data("col");
+                if (winner.includes(`${row}-${col}`)) {
+                    $(this).addClass('winner'); // Add winner class to highlighted cells
+                }
+            });
+        }
+
+        // Function to refresh the board every 2 seconds
+        function refreshBoard() {
+            fetch(`/freeplay/game_state/${gameUUID}`)
+            .then(response => response.json())
+            .then(data => {
+                updateBoard(data.board);
+                $("#current-player").text(data.current_player);
+                $("#game-state").text(data.game_state);
+                if (data.winner) {
+                    highlightWinner(data.winner);
+                }
+            });
+        }
+
+        // Event listener for clicking a cell
+        $(".cell").click(function() {
+            if ($(this).text() === "" && $("#game-state").text() !== "Hra skončila") {
+                let row = $(this).data("row");
+                let col = $(this).data("col");
+                makeMove(row, col);  // Send move when a cell is clicked
+            }
+        });
+
+        // Restart button functionality
+        $("#restart-btn").click(function() {
+            fetch(`/freeplay/restart/${gameUUID}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateBoard(data.board);
+                $("#current-player").text(data.current_player);
+                $("#game-state").text("Očekává se hráč O");
+            });
+        });
+
+        setInterval(refreshBoard, 2000); // Refresh every 2 seconds
+    </script>
+</body>
+</html>
+

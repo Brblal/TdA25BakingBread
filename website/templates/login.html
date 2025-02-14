@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}
+Login
+{% endblock %}
+
+{% block content%}
+<style>
+body {
+ 
+  background-image: url('/static/files/img/bg.png');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: 100% 100%;
+  
+}
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: white;
+  opacity: 1; /* Firefox */
+
+}
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    transition: background-color 5000s ease-in-out 0s;
+}
+input:-webkit-autofill, input:-webkit-autofill:focus {
+  box-shadow: 0 0 0 1000px transparent inset;
+  -webkit-text-fill-color: white;
+}
+</style>
+<form class="login" method="POST">
+     <br>   
+   
+    <div >
+       
+        <input type="text" class="heslo" id="email" name="email" placeholder="Uživatelské jméno/ email"/>
+    </div>
+    <div >
+        
+        <input type="password" class="heslo" id="password" name="password" placeholder="Heslo"/>
+    </div>
+
+    <br>
+    <button type="submit" class="loginbtn">Přihlásit</button>
+     <br>   
+</form>
+<h1 class="devlog"> #DevLOG </h1>
+{% endblock %}

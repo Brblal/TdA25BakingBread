@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}
+Accounts
+{% endblock %}
+
+{% block content%}
+<style>
+body {
+ 
+  background-image: url('/static/files/img/bg2.png');
+  
+  
+  
+}
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: black;
+  opacity: 1; /* Firefox */
+
+}
+</style>
+<br><br><br><br>
+<h3 align="center">Účty</h3>
+    <table class="table table-striped">
+        <tr class="table-primary">
+            <th>Id</th>
+            <th></th>
+            <th>Jméno</th>
+            <th>Email</th>
+            <th>Uživatelské jméno</th>
+            <th>Admin</th>
+            <th></th>
+            <th></th>
+        </tr>
+
+
+        {% for usery in users%}
+        <tr>
+            <td>{{usery.id}}</td>
+            <td> <img class="pf2" src="/static/files/img/{{usery.Profile_pic or 'zaklad.png'}}" width="40px" height="40px" >    </td>
+            <td>{{usery.name}}</td>
+            <td>{{usery.email}}</td>
+            <td>{{usery.user_name}}</td>
+            <td>
+                {%if usery.admin == 'something'%}
+                Ano
+                {%else%}
+                Ne
+                {%endif%}
+            </td>
+            <td><a href="edit_user/{{usery.id}}" class="btn btn-default pull-right">Upravit</a></td>
+            <td>
+                <button type="button" class="close" onClick="deleteUser({{ usery.id }})">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+{% endblock %}

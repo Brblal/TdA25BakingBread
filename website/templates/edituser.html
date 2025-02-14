@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}
+Edit user
+{% endblock %}
+
+{% block content %}
+<style>
+body {
+ 
+  background-image: url('/static/files/img/bg2.png');
+  
+  
+  
+}
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: black;
+  opacity: 1; /* Firefox */
+
+}
+    </style>
+<br><br><br><br>
+<form class="zaznam" method="POST">
+    
+    <div class="form-group">
+        <label class="label" for="email">Email Adresa</label> <br>
+        <input value="{{acc.email}}" type="email" class="zaznam1" id="email" name="email" placeholder="Napište Email"/>
+    </div>
+    <div class="form-group">
+        <label class="label" for="name">Celé jméno</label> <br>
+        <input value="{{acc.name}}"type="text" class="zaznam1" id="name" name="name" placeholder="Napište Celé jméno"/>
+    </div>
+    <div class="form-group">
+        <label class="label" for="userName">Uživatelské jméno</label><br>
+        <input value="{{acc.user_name}}" type="text" class="zaznam1" id="userName" name="userName" placeholder="Napište Uživatelské jméno"/>
+    </div>
+    {% if acc.admin == 'something' %}
+    <div class="form-group">
+        <input class="form-check-input" type="checkbox" id="check" name="check" value="something" checked>
+        <label class="label" class="form-check-label" for="check">Admin</label><br>
+      </div>
+    {% else %}
+    <div class="form-group">
+        <input class="form-check-input" type="checkbox" id="check" name="check" value="something">
+        <label class="label" class="form-check-label" for="check">Admin</label>
+      </div>
+    {% endif %}
+    
+    <button type="submit" class="zaznambtn">Upravit účet</button>
+</form>
+{% endblock %}
