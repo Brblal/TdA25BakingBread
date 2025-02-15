@@ -307,28 +307,36 @@ def freeplay_page():
 
     return redirect(url_for('views.fp_game_page', game_uuid=new_game.uuid, player_uuid=new_game.player_x_uuid))  # Redirect
 
+@views.route('/freeplay/confirm_join/<game_uuid>', methods=['GET'])
+def confirm_join(game_uuid):
+    # Pokud chcete vynutit generování nového UUID, ignorujte query parametr
+    player_uuid = str(uuid.uuid4())
+    return render_template("confirm_join.html", game_uuid=game_uuid, player_uuid=player_uuid)
 
-@views.route('/freeplay/join/<game_uuid>', methods=['GET'])
-def join_game(game_uuid):
+
+@views.route('/freeplay/join/<game_uuid>', methods=['POST'])
+def join_game_post(game_uuid):
+    # Získáme player_uuid z formuláře
+    player_uuid = request.form.get("player_uuid")
+    
     game = Gamefp.query.filter_by(uuid=game_uuid).first()
     if not game:
         abort(404, description="Game not found.")
 
-    if game.player_o_uuid:  # If player O is already assigned, the game is full
+    if game.player_o_uuid:  # Pokud je hráč O již přiřazen, hra je plná
         return "The game is full!", 400
 
-    player_uuid = str(uuid.uuid4())
+    # Pokud z formuláře neobdržíme player_uuid, vygenerujeme nové (ale ideálně se tam vždy předá)
+    if not player_uuid:
+        player_uuid = str(uuid.uuid4())
     
     print("Before join:", game.player_x_uuid, game.player_o_uuid)
-    game.player_o_uuid = player_uuid  # Assign UUID for player O
+    game.player_o_uuid = player_uuid  # Přiřadíme UUID pro hráče O
     print("After join:", game.player_x_uuid, game.player_o_uuid)
     
-    db.session.commit()  # Save changes
+    db.session.commit()  # Uložíme změny
 
-    game = Gamefp.query.filter_by(uuid=game_uuid).first()  # Reload from DB
-    print("After reload from DB:", game.player_x_uuid, game.player_o_uuid)
-
-    return redirect(url_for('views.fp_game_page', game_uuid=game.uuid, player_uuid=player_uuid))  # Redirect
+    return redirect(url_for('views.fp_game_page', game_uuid=game.uuid, player_uuid=player_uuid))
 
 
 @views.route('/freeplay/game/<game_uuid>', methods=['GET'])

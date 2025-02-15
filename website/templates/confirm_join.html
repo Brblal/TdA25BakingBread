@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <title>Potvrdit připojení do hry</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Potvrdit připojení do hry</h1>
+        <p>Chcete se připojit do hry s ID: <strong>{{ game_uuid }}</strong>?</p>
+        <!-- Formulář odesílá POST na join endpoint -->
+        <form action="{{ url_for('views.join_game_post', game_uuid=game_uuid) }}" method="POST">
+            <!-- Skrytý input s hodnotou player_uuid -->
+            <input type="hidden" name="player_uuid" value="{{ player_uuid }}">
+            <button type="submit">Ano, připojit se</button>
+        </form>
+        <p><a href="{{ url_for('views.fp_game_page', game_uuid=game_uuid, player_uuid=player_uuid) }}">Ne, vrátit se zpět</a></p>
+    </div>
+</body>
+</html>
