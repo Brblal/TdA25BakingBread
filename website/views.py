@@ -32,7 +32,13 @@ from flask import abort
 from .models import User  # Pokud je User model definován v models.py
 from .models import Entry
 from .models import Gamefp
+from .models import Gameranked
 from sqlalchemy.orm.attributes import flag_modified
+import time
+
+waiting_players = []
+waiting_players_ranked = []
+
 
 
 
@@ -49,7 +55,7 @@ api = Blueprint('api', __name__)
 # Initialize the LoginManager
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = "views.login"  # Ujistěte se, že tento odkaz odpovídá vaší přihlašovací stránce
+login_manager.login_view = "login"  # Ujistěte se, že tento odkaz odpovídá vaší přihlašovací stránce
 
 # Set up the login view, so users are redirected to the login page when not authenticated
 
@@ -132,10 +138,63 @@ def create_acc():
 @login_required
 def profile():
     return render_template("profile.html", current_user=current_user)
+@views.route('/update_profile_image', methods=['POST'])
+@login_required
+def update_profile_image():
+    selected_image = request.form.get('profile_image')
+    
+    # Ujistíme se, že vybraný obrázek je jeden z přednastavených
+    if selected_image in ['files/profile/profil1.png', 'files/profile/profil2.png', 'files/profile/profil3.png']:
+        current_user.profile_image = f'static/{selected_image}'
+        db.session.commit()
+        flash('Profilový obrázek byl úspěšně změněn!', category='success')
+    else:
+        flash('Vybraný obrázek není platný', category='error')
+
+    return redirect(url_for('views.profile'))
 
 
+@views.route('/users', methods=['GET'])
+@login_required
+def users():
+    sort_by = request.args.get('sort_by', 'elo')  # Výchozí řazení podle ELO
 
+    # Mapa pro správné řazení podle sloupce
+    sort_options = {
+        'elo': User.elo.desc(),
+        'wins': User.wins.desc(),
+        'mp': User.mp.desc(),
+        'wr': User.wr.desc(),
+        'name': User.name.asc(),
+        
+    }
 
+    # Použití zvolené metody řazení, pokud existuje v sort_options
+    all_users = User.query.order_by(sort_options.get(sort_by, User.elo.desc())).all()
+
+    return render_template('users.html', users=all_users, sort_by=sort_by)
+@views.route('/add_friend/<int:friend_id>', methods=['POST'])
+@login_required
+def add_friend(friend_id):
+    friend = User.query.get(friend_id)
+    
+    if not friend:
+        flash('Uživatel neexistuje!', category='error')
+        return redirect(url_for('views.users'))
+
+    # Kontrola, zda už nejsou přátelé
+    existing_friendship = Friend.query.filter_by(user_id=current_user.id, friend_id=friend_id).first()
+    if existing_friendship:
+        flash('Tento uživatel už je tvůj přítel!', category='info')
+        return redirect(url_for('views.users'))
+
+    # Přidání přátelství do databáze
+    new_friendship = Friend(user_id=current_user.id, friend_id=friend_id)
+    db.session.add(new_friendship)
+    db.session.commit()
+
+    flash(f'Přidal jsi {friend.user_name} mezi přátele!', category='success')
+    return redirect(url_for('views.users'))
       
 @views.route('/restart', methods=['GET', 'POST'])
 def clear():
@@ -313,6 +372,19 @@ def confirm_join(game_uuid):
     player_uuid = str(uuid.uuid4())
     return render_template("confirm_join.html", game_uuid=game_uuid, player_uuid=player_uuid)
 
+@views.route('/freeplay/invite_link/<game_uuid>', methods=['GET'])
+def invite_link(game_uuid):
+    """Vrátí zvací odkaz pro připojení do hry"""
+    game = Gamefp.query.filter_by(uuid=game_uuid).first()
+    if not game:
+        abort(404, description="Game not found.")
+    
+    # Vytvoření odkazu s UUID hry
+    invite_url = request.host_url + f"freeplay/confirm_join/{game_uuid}"
+    
+    return jsonify({'invite_url': invite_url})
+
+
 
 @views.route('/freeplay/join/<game_uuid>', methods=['POST'])
 def join_game_post(game_uuid):
@@ -375,6 +447,29 @@ def get_game_state(game_uuid):
         'game_state': game.game_state,
         
     })
+# Funkce pro kontrolu vítěze na serveru
+def check_winner(board):
+    win_condition = 5  # Počet polí pro vítězství (např. 5 v řadě)
+    size = 15  # Velikost desky 15x15
+
+    for row in range(size):
+        for col in range(size):
+            if board[row][col] != '':
+                # Kontrola horizontální
+                if col + win_condition <= size and all(board[row][col + i] == board[row][col] for i in range(win_condition)):
+                    return board[row][col]
+                # Kontrola vertikální
+                if row + win_condition <= size and all(board[row + i][col] == board[row][col] for i in range(win_condition)):
+                    return board[row][col]
+                # Kontrola diagonální (dolů doprava)
+                if row + win_condition <= size and col + win_condition <= size and all(board[row + i][col + i] == board[row][col] for i in range(win_condition)):
+                    return board[row][col]
+                # Kontrola diagonální (doprava doleva)
+                if row + win_condition <= size and col - win_condition >= -1 and all(board[row + i][col - i] == board[row][col] for i in range(win_condition)):
+                    return board[row][col]
+    
+    return None
+
 @views.route('/freeplay/move/<game_uuid>', methods=['PUT'])
 def make_move_fp(game_uuid):
     player_uuid = request.json.get('player_uuid')
@@ -384,8 +479,9 @@ def make_move_fp(game_uuid):
     game = Gamefp.query.filter_by(uuid=game_uuid).first()
     if not game:
         return jsonify({'error': 'Game not found'}), 404
+    if game.game_state != 'probíhá':
+        return jsonify({'error': 'Game is over, no more moves allowed'}), 400
 
-    # Check if player_uuid is valid
     if player_uuid != game.player_x_uuid and player_uuid != game.player_o_uuid:
         return jsonify({'error': 'Player not part of the game'}), 400
 
@@ -403,12 +499,16 @@ def make_move_fp(game_uuid):
     symbol = 'X' if player_uuid == game.player_x_uuid else 'O'
     game.board[row][col] = symbol
 
-    # Flaguj, že atribut board byl změněn
+    # Check for winner
+    winner = check_winner(game.board)
+    if winner:
+        game.game_state = f'{winner} wins'
+    else:
+        # Switch player turn
+        game.current_player = 'O' if game.current_player == 'X' else 'X'
+
+    # Flag to indicate board was modified
     flag_modified(game, "board")
-
-    # Switch player turn
-    game.current_player = 'O' if game.current_player == 'X' else 'X'
-
     db.session.commit()
 
     return jsonify({
@@ -416,7 +516,131 @@ def make_move_fp(game_uuid):
         'board': game.board,
         'current_player': game.current_player,
         'game_state': game.game_state,
+        'winner': winner if winner else None
     })
+@views.route('/freeplay/matchmaking', methods=['POST'])
+def matchmaking():
+    """Hráč vstoupí do fronty na matchmaking."""
+    player_uuid = str(uuid.uuid4())  # Vytvoříme unikátní player_uuid
+    waiting_players.append({'player_uuid': player_uuid, 'timestamp': time.time()})  # Přidáme hráče do fronty
+
+    # Pokud je ve frontě alespoň 2 hráči, spárujeme je do hry
+    if len(waiting_players) >= 2:
+        player_1 = waiting_players.pop(0)  # Nejstarší hráč dostane "X"
+        player_2 = waiting_players.pop(0)  # Druhý hráč dostane "O"
+
+        # Vytvoření nové hry
+        new_game = Gamefp()
+        new_game.uuid = str(uuid.uuid4())  # Unikátní ID hry
+        new_game.player_x_uuid = player_1['player_uuid']
+        new_game.player_o_uuid = player_2['player_uuid']
+        new_game.board = [['' for _ in range(15)] for _ in range(15)]  # Prázdná hrací deska
+        new_game.current_player = 'X'  # Začíná hráč "X"
+        new_game.game_state = 'probíhá'  # Hra probíhá
+
+        db.session.add(new_game)
+        db.session.commit()
+
+        # Připravíme URL pro každého hráče
+        game_url_x = url_for('views.fp_game_page', game_uuid=new_game.uuid, player_uuid=new_game.player_x_uuid)
+        game_url_o = url_for('views.fp_game_page', game_uuid=new_game.uuid, player_uuid=new_game.player_o_uuid)
+
+        return jsonify({
+            'status': 'matched',
+            'game_uuid': new_game.uuid,
+            'player_x_uuid': new_game.player_x_uuid,
+            'player_o_uuid': new_game.player_o_uuid,
+            'game_url_x': game_url_x,
+            'game_url_o': game_url_o
+        }), 200
+
+    return jsonify({'status': 'waiting', 'player_uuid': player_uuid}), 200
+
+
+@views.route('/freeplay/matchmake_check/<player_uuid>', methods=['GET'])
+def matchmake_check(player_uuid):
+    """Zkontroluje, zda je hráč již spárován do hry, a vrátí mu URL hry."""
+    game = Gamefp.query.filter((Gamefp.player_x_uuid == player_uuid) | (Gamefp.player_o_uuid == player_uuid)).first()
+
+    if game:
+        game_url = url_for('views.fp_game_page', game_uuid=game.uuid, player_uuid=player_uuid)
+        return jsonify({'status': 'matched', 'game_url': game_url}), 200
+
+    return jsonify({'status': 'waiting'}), 200
+@views.route('/ranked')
+@login_required  # Pokud není hráč přihlášen, přesměruje ho na /login
+def ranked():
+    return render_template('ranked.html')
+
+@views.route('/ranked/matchmaking', methods=['POST'])
+@login_required
+def ranked_matchmaking():
+    """Hráč vstoupí do fronty na ranked matchmaking."""
+    player_uuid = str(uuid.uuid4())  # Unikátní identifikátor hráče
+    waiting_players_ranked.append({'player_uuid': player_uuid, 'timestamp': time.time()})
+
+    # Pokud jsou ve frontě alespoň dva hráči, spárujeme je
+    if len(waiting_players_ranked) >= 2:
+        player_1 = waiting_players_ranked.pop(0)
+        player_2 = waiting_players_ranked.pop(0)
+
+        new_game = Gameranked()
+        new_game.uuid = str(uuid.uuid4())
+        new_game.player_x_uuid = player_1['player_uuid']
+        new_game.player_o_uuid = player_2['player_uuid']
+        new_game.player_x_name = current_user.user_name  # Jméno prvního hráče
+        new_game.player_o_name = ""  # Druhý hráč zatím neznámý
+        new_game.board = [['' for _ in range(15)] for _ in range(15)]
+        new_game.current_player = 'X'
+        new_game.game_state = 'waiting'
+
+        db.session.add(new_game)
+        db.session.commit()
+
+        return jsonify({
+            'status': 'matched',
+            'game_uuid': new_game.uuid,
+            'player_x_uuid': new_game.player_x_uuid,
+            'player_o_uuid': new_game.player_o_uuid,
+            'game_url_x': url_for('views.ranked_game_page', game_uuid=new_game.uuid, player_uuid=new_game.player_x_uuid),
+            'game_url_o': url_for('views.ranked_game_page', game_uuid=new_game.uuid, player_uuid=new_game.player_o_uuid)
+        }), 200
+
+    return jsonify({'status': 'waiting', 'player_uuid': player_uuid}), 200
+
+
+@views.route('/ranked/game/<game_uuid>', methods=['GET'])
+@login_required
+def ranked_game_page(game_uuid):
+    player_uuid = request.args.get("player_uuid")
+    game = Gameranked.query.filter_by(uuid=game_uuid).first()
+    if not game:
+        abort(404, description="Game not found.")
+
+    game_players = {
+        'X': game.player_x_name if game.player_x_uuid == player_uuid else "Čeká se...",
+        'O': game.player_o_name if game.player_o_uuid == player_uuid else "Čeká se..."
+    }
+
+    current_player = 'X' if game.player_x_uuid == player_uuid else ('O' if game.player_o_uuid == player_uuid else None)
+
+    return render_template("ranked-game.html", game=game, game_players=game_players, player_uuid=player_uuid, current_player=current_player)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class TicTacToe:
     def __init__(self, size=15, win_condition=5):

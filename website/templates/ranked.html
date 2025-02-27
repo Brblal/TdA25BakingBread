@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main-container">
+    <h1>Ranked Matchmaking</h1>
+    <p>Find an opponent and climb the rankings!</p>
+
+    <div class="tile">
+        <form id="ranked-matchmaking-form">
+            <button type="button" class="btn" onclick="findRankedMatch()">
+                <img src="{{ url_for('static', filename='files/img/icons/zarivka_ranked_bile.png') }}" alt="Ranked Match Icon">
+                <span>Find Ranked Match</span>
+            </button>
+            <p id="timer">Waiting: 0s</p>
+        </form>
+    </div>
+
+    <a href="{{ url_for('views.home') }}" class="btn">Back to Menu</a>
+</div>
+
+<script>
+let timer = 0;
+let timerInterval;
+
+function findRankedMatch() {
+    fetch('{{ url_for("views.ranked_matchmaking") }}', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'matched') {
+                // If matched, redirect to game page
+                window.location.href = data.game_url_x; // assuming player X starts the game
+            } else {
+                startRankedTimer();
+                checkForRankedMatch(data.player_name);
+            }
+        });
+}
+
+function checkForRankedMatch(player_name) {
+    const interval = setInterval(() => {
+        fetch(`/ranked/matchmake_check/${player_name}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'matched') {
+                    clearInterval(interval);
+                    clearInterval(timerInterval);
+                    window.location.href = data.game_url;
+                }
+            });
+    }, 2000);
+}
+
+function startRankedTimer() {
+    timer = 0;
+    timerInterval = setInterval(() => {
+        timer++;
+        document.getElementById("timer").innerText = `Waiting: ${timer}s`;
+    }, 1000);
+}
+</script>
+{% endblock %}

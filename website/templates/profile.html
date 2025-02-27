@@ -1,20 +1,73 @@
+{% extends "base.html" %}
+
+{% block content %}
 <!DOCTYPE html>
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profil</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1>Vítej, {{ current_user.name }}!</h1>
-        <p><strong>Email:</strong> {{ current_user.email }}</p>
-        <p><strong>Uživatelské jméno:</strong> {{ current_user.user_name }}</p>
-        
-        <a href="{{ url_for('views.logout') }}" class="btn">Odhlásit se</a>
+    <div class="profile-container">
+        <div class="profile-header">
+            <div class="main-info">
+                <h1>Vítej, {{ current_user.name }}!</h1>
+                <p><strong>Email:</strong> {{ current_user.email }}</p>
+                <p><strong>Uživatelské jméno:</strong> {{ current_user.user_name }}</p>
+            </div>
+            <div class="profile-img">
+                <!-- Aktuální profilový obrázek -->
+                <img src="{{ url_for('static', filename=current_user.profile_image.split('static/')[1]) }}" alt="Profilový obrázek" class="img-fluid">
+            </div>
+
+        </div>
+
+        <!-- Tlačítko pro výběr obrázku pod profilovým obrázkem -->
+        <div class="change-image-btn">
+            <button type="button" id="show-image-options" class="btn change-image-btn-small" >Změnit profilový obrázek</button>
+        </div>
+
+        <!-- Možnosti pro výběr barvy obrázku (skryté) -->
+        <div id="image-options" style="display: none;">
+            <form action="{{ url_for('views.update_profile_image') }}" method="POST">
+                <label>
+                    <input type="radio" name="profile_image" value="files/profile/profil1.png" {% if current_user.profile_image == 'static/files/profile/profil_white.png' %}checked{% endif %}>
+                    Bílá
+                </label>
+                <label>
+                    <input type="radio" name="profile_image" value="files/profile/profil2.png" {% if current_user.profile_image == 'static/files/profile/profil_blue.png' %}checked{% endif %}>
+                    Černá
+                </label>
+                <label>
+                    <input type="radio" name="profile_image" value="files/profile/profil3.png" {% if current_user.profile_image == 'static/files/profile/profil_black.png' %}checked{% endif %}>
+                    Modrá
+                </label>
+                <button type="submit" class="btn">Uložit změnu</button>
+            </form>
+        </div>
+
+        <div class="stats">
+            <p>Statistiky (Odehrané hry, WR, ELO atd.)</p>
+        </div>
+
+        <div class="profile-footer">
+            <a href="{{ url_for('views.logout') }}" class="btn">Odhlásit se</a>
+        </div>
     </div>
+
+    <script>
+        // JavaScript pro zobrazení možností výběru barvy obrázku
+        document.getElementById('show-image-options').addEventListener('click', function() {
+            var options = document.getElementById('image-options');
+            if (options.style.display === 'none') {
+                options.style.display = 'block';
+            } else {
+                options.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>
-
-
+{% endblock %}

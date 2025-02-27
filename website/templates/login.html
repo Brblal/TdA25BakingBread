@@ -3,47 +3,29 @@
 Login
 {% endblock %}
 
-{% block content%}
-<style>
-body {
- 
-  background-image: url('/static/files/img/bg.png');
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: 100% 100%;
-  
-}
-::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
-  color: white;
-  opacity: 1; /* Firefox */
+{% block content %}
+<div class="container">
+    <form class="login" method="POST">
+        <!-- Logo nahoře -->
+        <div class="logo">
+            
+            <img src="{{ url_for('static', filename='files/img/Think-different-Academy_LOGO_oficialni-bile2.png') }}" alt="Logo">
+        </div>
 
-}
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-    transition: background-color 5000s ease-in-out 0s;
-}
-input:-webkit-autofill, input:-webkit-autofill:focus {
-  box-shadow: 0 0 0 1000px transparent inset;
-  -webkit-text-fill-color: white;
-}
-</style>
-<form class="login" method="POST">
-     <br>   
-   
-    <div >
-       
-        <input type="text" class="heslo" id="email" name="email" placeholder="Uživatelské jméno/ email"/>
-    </div>
-    <div >
-        
-        <input type="password" class="heslo" id="password" name="password" placeholder="Heslo"/>
-    </div>
+        <!-- Přihlašovací formulář -->
+        <div>
+            <input type="text" class="heslo" id="email" name="email" placeholder="Email"/>
+        </div>
+        <div>
+            <input type="password" class="heslo" id="password" name="password" placeholder="Heslo"/>
+        </div>
+        <button type="submit" class="loginbtn">Přihlásit</button>
 
-    <br>
-    <button type="submit" class="loginbtn">Přihlásit</button>
-     <br>   
-</form>
-<h1 class="devlog"> #DevLOG </h1>
+        <!-- Odkazy pro vytvoření účtu a obnovení hesla -->
+        <div class="links">
+            <a href="/create-acc" class="link">Vytvořit účet</a>
+            <a href="/reset-acc" class="link">Obnovit heslo</a>
+        </div>
+    </form>
+</div>
 {% endblock %}

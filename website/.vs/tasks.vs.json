@@ -1,0 +1,10 @@
+{
+  "version": "0.2.1",
+  "tasks": [
+    {
+      "taskLabel": "\u00FAloha \u2013 home",
+      "appliesTo": "templates/home.html",
+      "type": "launch"
+    }
+  ]
+}

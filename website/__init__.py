@@ -31,7 +31,7 @@ def create_app():
     # Importovat modely až po inicializaci db
     from .models import Game  
     login_manager = LoginManager()
-    login_manager.login_view = 'auth.login'  # Název view funkce pro login
+    login_manager.login_view = 'views.login'  # Název view funkce pro login
     login_manager.init_app(app)
 
     from .models import User

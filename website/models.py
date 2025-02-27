@@ -22,6 +22,13 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(50))
     user_name = db.Column(db.String(50), unique=True)
     password = db.Column(db.String(100))
+    profile_image = db.Column(db.String(150), default='static/files/profile/profil1.png') 
+    elo = db.Column(db.Integer, default=1000)  # ELO by mělo být celé číslo
+    wins = db.Column(db.Integer, default=0)  # Výhry jako celé číslo
+    mp = db.Column(db.Integer, default=0)  # Počet odehraných her (Matches Played)
+    wr = db.Column(db.Float, default=0.0) 
+
+
     
     entries = db.relationship('Entry')
     
@@ -30,7 +37,13 @@ class User(db.Model, UserMixin):
         return str(self.id)  # Flask-Login requires this method
     
 
-    
+class Friend(db.Model):
+   id = db.Column(db.Integer, primary_key=True)
+   user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+   friend_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+   user = db.relationship('User', foreign_keys=[user_id])
+   friend = db.relationship('User', foreign_keys=[friend_id])
+   
 
 
 class Game(db.Model):
@@ -57,8 +70,24 @@ class Game(db.Model):
 class Gamefp(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     uuid = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
-    game_state = db.Column(db.String(50), default='opening')
+    game_state = db.Column(db.String(50), default='probíhá')
     board = db.Column(db.PickleType, default=[['' for _ in range(15)] for _ in range(15)])
     player_x_uuid = db.Column(db.String(36), nullable=True)  # UUID pro hráče X
     player_o_uuid = db.Column(db.String(36), nullable=True)  # UUID pro hráče O
     current_player = db.Column(db.String(1), default='X')
+
+
+
+class Gameranked(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    uuid = db.Column(db.String(36), unique=True, nullable=False, default=lambda: str(uuid.uuid4()))
+    game_state = db.Column(db.String(50), default='probíhá')
+    board = db.Column(db.PickleType, default=[['' for _ in range(15)] for _ in range(15)])
+    player_x_uuid = db.Column(db.String(36), nullable=True)  # UUID pro hráče X
+    player_o_uuid = db.Column(db.String(36), nullable=True)  # UUID pro hráče O
+    player_x_name = db.Column(db.String(100), nullable=True)  # Uživatelské jméno pro hráče X
+    player_o_name = db.Column(db.String(100), nullable=True)  # Uživatelské jméno pro hráče O
+    current_player = db.Column(db.String(1), default='X')  # Který hráč má tah
+
+    def __repr__(self):
+        return f"<Game {self.uuid}>"

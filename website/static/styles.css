@@ -1,0 +1,51 @@
+body.body-login {
+    background-color: #0070BB;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    flex-direction: column;
+}
+
+.login {
+    background-color: #E31837;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    width: 300px;
+    text-align: center;
+    display: flex;
+    justify-content: center;  /* Horizontální zarovnání */
+    align-items: center;      /* Vertikální zarovnání */
+    flex-direction: column;   /* Udržuje obsah uvnitø ve sloupci */
+}
+
+.login input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.heslo {
+    background-color: #FFFFFF;
+    color: #333;
+}
+
+.loginbtn {
+    background-color: #0070BB;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.loginbtn:hover {
+    background-color: #005D8E;
+}

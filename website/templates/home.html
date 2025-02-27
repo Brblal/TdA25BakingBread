@@ -1,6 +1,8 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block content %}
+
+
 <div class="main-container">
     <div class="tile-container">
         <div class="tile">
@@ -25,10 +27,70 @@
     <form action="{{ url_for('views.freeplay_page') }}" method="POST">
         <button type="submit" class="btn">
             <img src="{{ url_for('static', filename='files/img/icons/zarivka_thinking_bile.png') }}" alt="Challenges Icon">
-            <span>New Game</span>
+            <span>Private game</span>
         </button>
     </form>
 </div>
-    </div>
+ <div class="tile">
+    <form id="matchmaking-form">
+        <button type="button" class="btn" id="matchmaking-btn" onclick="findMatch()">
+            <img src="{{ url_for('static', filename='files/img/icons/zarivka_thinking_bile.png') }}" alt="Matchmaking Icon">
+            <span>Find Match</span>
+        </button>
+    </form>
+    <p id="waiting-message" style="display: none;">Waiting for opponent... <span id="timer">0</span>s</p>
 </div>
+
+
+
+
+
+
+
+<script>
+let waitingStartTime;
+let timerInterval;
+
+function findMatch() {
+    document.getElementById("matchmaking-btn").style.display = "none"; // Skryjeme tlačítko
+    document.getElementById("waiting-message").style.display = "block"; // Zobrazíme zprávu o čekání
+    document.getElementById("timer").textContent = "0"; // Resetujeme časovač
+    waitingStartTime = Date.now();
+
+    // Spustíme časovač
+    timerInterval = setInterval(() => {
+        let elapsedSeconds = Math.floor((Date.now() - waitingStartTime) / 1000);
+        document.getElementById("timer").textContent = elapsedSeconds;
+    }, 1000); 
+
+    fetch('{{ url_for("views.matchmaking") }}', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'matched') {
+                clearInterval(timerInterval); // Zastavíme časovač
+                if (data.player_x_uuid === data.player_uuid) {
+                    window.location.href = data.game_url_x;
+                } else {
+                    window.location.href = data.game_url_o;
+                }
+            } else {
+                checkForMatch(data.player_uuid);
+            }
+        });
+}
+
+function checkForMatch(player_uuid) {
+    const interval = setInterval(() => {
+        fetch(`/freeplay/matchmake_check/${player_uuid}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'matched') {
+                    clearInterval(interval);
+                    clearInterval(timerInterval); // Zastavíme časovač
+                    window.location.href = data.game_url;
+                }
+            });
+    }, 2000); // Kontrola každé 2 sekundy
+}
+</script>
 {% endblock %}

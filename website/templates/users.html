@@ -1,0 +1,62 @@
+﻿{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2 class="title">Žebříček hráčů</h2>
+
+    <div class="sort-options">
+        Řadit podle:
+        <a href="{{ url_for('views.users', sort_by='elo') }}">ELO</a> |
+        <a href="{{ url_for('views.users', sort_by='wins') }}">Výhry</a> |
+        <a href="{{ url_for('views.users', sort_by='mp') }}">Odehrané hry</a> |
+        <a href="{{ url_for('views.users', sort_by='wr') }}">Winrate</a> |
+        <a href="{{ url_for('views.users', sort_by='user_name') }}">Uživatelské jméno</a>
+    </div>
+
+    {% if users|length >= 3 %}
+    <div class="podium">
+        <div class="second">
+            <img src="{{ users[1].profile_image }}" alt="Profilový obrázek">
+            <p class="username">{{ users[1].user_name }}</p>
+            <p>ELO: {{ users[1].elo }}</p>
+            <span class="position">2</span>
+        </div>
+
+        <div class="first">
+            <img src="{{ users[0].profile_image }}" alt="Profilový obrázek">
+            <p class="username">{{ users[0].user_name }}</p>
+            <p>ELO: {{ users[0].elo }}</p>
+            <span class="position">1</span>
+        </div>
+
+        <div class="third">
+            <img src="{{ users[2].profile_image }}" alt="Profilový obrázek">
+            <p class="username">{{ users[2].user_name }}</p>
+            <p>ELO: {{ users[2].elo }}</p>
+            <span class="position">3</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <table class="leaderboard">
+        <tr>
+            <th>#</th>
+            <th>Uživatel</th>
+            <th>ELO</th>
+            <th>Výhry</th>
+            <th>Zápasy</th>
+            <th>Winrate</th>
+        </tr>
+        {% for user in users[3:] %}
+        <tr>
+            <td>{{ loop.index + 2 }}</td>
+            <td>{{ user.user_name }}</td>
+            <td>{{ user.elo }}</td>
+            <td>{{ user.wins }}</td>
+            <td>{{ user.mp }}</td>
+            <td>{{ user.wr }}%</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}
